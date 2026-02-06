@@ -36,6 +36,12 @@ Safari is not supported for this workflow because of incomplete MediaRecorder an
 3. Audio tracks are mixed with the Web Audio API and recorded with `MediaRecorder` into WebM.
 4. After recording stops, FFmpeg.wasm converts WebM to MP4 (H.264 + AAC).
 
+## MP4 conversion controls
+
+- By default, conversion is manual.
+- Use the checkbox “Convert automatically” to convert after each recording.
+- Use “Convert to MP4” to start conversion manually, then “Download MP4”.
+
 ## Known limitations
 
 - MP4 conversion runs in the browser and can be slow for long recordings.
@@ -43,6 +49,11 @@ Safari is not supported for this workflow because of incomplete MediaRecorder an
 - The tab must stay open during conversion.
 - System audio capture depends on browser and user-selected source.
 - FFmpeg.wasm core assets are fetched from a CDN at runtime. Offline use requires hosting those files yourself.
+
+## Troubleshooting
+
+- If FFmpeg workers fail to load in dev, ensure your CSP allows `blob:` and that the CDN is reachable.
+- Vite dep optimizer can break FFmpeg workers; this project excludes `@ffmpeg/ffmpeg` and `@ffmpeg/util` from optimizeDeps.
 
 ## Internationalization
 

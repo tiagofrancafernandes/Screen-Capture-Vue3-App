@@ -1,6 +1,7 @@
 # Screen Capture App
 
 Changelog: `changelog.md`.
+English README: `README.md`.
 
 Aplicativo web em Vue 3 que grava a tela com audio do microfone e audio do sistema (quando suportado) e entrega um arquivo MP4 final (H.264 + AAC). A gravacao e capturada em WebM no navegador e convertida para MP4 usando FFmpeg.wasm.
 
@@ -35,6 +36,12 @@ Safari nao e suportado para este fluxo por causa do suporte incompleto a MediaRe
 3. As faixas de audio sao mixadas com Web Audio API e gravadas com `MediaRecorder` em WebM.
 4. Apos finalizar, o FFmpeg.wasm converte WebM para MP4 (H.264 + AAC).
 
+## Controles de conversao para MP4
+
+- Por padrao, a conversao e manual.
+- Use o checkbox “Converter automaticamente” para converter apos cada gravacao.
+- Use “Converter para MP4” para iniciar a conversao manualmente e depois “Baixar MP4”.
+
 ## Limitacoes conhecidas
 
 - A conversao para MP4 roda no navegador e pode ser lenta para gravacoes longas.
@@ -42,6 +49,11 @@ Safari nao e suportado para este fluxo por causa do suporte incompleto a MediaRe
 - A aba deve permanecer aberta durante a conversao.
 - A captura de audio do sistema depende do navegador e da fonte selecionada.
 - Os assets do core do FFmpeg.wasm sao baixados de um CDN em tempo de execucao. Para uso offline, hospede esses arquivos por conta propria.
+
+## Solucao de problemas
+
+- Se os workers do FFmpeg falharem no dev, garanta que a CSP permite `blob:` e que o CDN esta acessivel.
+- O otimizador de deps do Vite pode quebrar workers; este projeto exclui `@ffmpeg/ffmpeg` e `@ffmpeg/util` de optimizeDeps.
 
 ## Internacionalizacao
 
