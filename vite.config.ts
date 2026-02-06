@@ -7,6 +7,9 @@ import { fileURLToPath, URL } from 'node:url';
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [vue(), tailwindcss()],
+    optimizeDeps: {
+        exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
+    },
     resolve: {
         alias: {
             '@@': path.resolve(__dirname, './'),
@@ -29,14 +32,14 @@ export default defineConfig({
         },
     },
     server: {
-        // host: '0.0.0.0',
-        // allowedHosts: true, // Any host
-        allowedHosts: [
-            'localhost',
-            'app.tiagofranca.com',
-            'app.local.tiagofranca.com',
-            'app.hml.tiagofranca.com',
-            // ... other hosts
-        ],
+        host: '0.0.0.0',
+        allowedHosts: true, // Any host
+        // allowedHosts: [
+        //     'localhost',
+        //     'app.tiagofranca.com',
+        //     'app.local.tiagofranca.com',
+        //     'app.hml.tiagofranca.com',
+        //     // ... other hosts
+        // ],
     },
 });

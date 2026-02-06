@@ -3,7 +3,7 @@ type ConversionResult = {
     source: 'ffmpeg-wasm';
 };
 
-const CORE_BASE_URL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+const CORE_BASE_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core-mt@0.12.10/dist/esm';
 
 const loadCoreUrls = async () => {
     const { toBlobURL } = await import('@ffmpeg/util');

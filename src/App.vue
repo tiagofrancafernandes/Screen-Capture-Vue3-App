@@ -262,7 +262,7 @@ const webmDownloadName = computed(() =>
                     class="mt-4 w-full rounded-lg border border-slate-800 bg-slate-950"
                     controls
                     playsinline
-                    :src="mp4Url ?? webmUrl"
+                    :src="mp4Url ?? webmUrl ?? undefined"
                 ></video>
             </section>
         </div>
