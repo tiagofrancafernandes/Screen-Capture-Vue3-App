@@ -14,6 +14,7 @@ const webmUrl = ref<string | null>(null);
 const mp4Url = ref<string | null>(null);
 const mp4Name = ref('converted.mp4');
 const coreMode = ref<FfmpegCoreMode | null>(null);
+const conversionProgress = ref<number | null>(null);
 
 const revokeUrl = (url: string | null) => {
     if (url) {
@@ -25,6 +26,7 @@ const resetOutput = () => {
     revokeUrl(mp4Url.value);
     mp4Url.value = null;
     coreMode.value = null;
+    conversionProgress.value = null;
     status.value = 'idle';
     errorMessage.value = null;
 };
@@ -57,15 +59,24 @@ const convert = async () => {
 
     status.value = 'converting';
     errorMessage.value = null;
+    conversionProgress.value = 0;
 
     try {
-        const result = await convertWebmToMp4(webmFile.value);
+        const result = await convertWebmToMp4(webmFile.value, {
+            onProgress: (ratio) => {
+                conversionProgress.value = Math.min(Math.max(ratio, 0), 1);
+            },
+        });
         mp4Url.value = URL.createObjectURL(result.blob);
         coreMode.value = result.coreMode;
         status.value = 'ready';
     } catch (error) {
         status.value = 'error';
         errorMessage.value = t('converterError');
+    } finally {
+        if (status.value !== 'converting') {
+            conversionProgress.value = null;
+        }
     }
 };
 
@@ -81,6 +92,13 @@ const ffmpegModeLabel = computed(() => {
     }
 
     return coreMode.value === 'multi' ? t('ffmpegModeMulti') : t('ffmpegModeSingle');
+});
+
+const progressPercent = computed(() => {
+    if (conversionProgress.value === null) {
+        return null;
+    }
+    return Math.round(conversionProgress.value * 100);
 });
 
 onBeforeUnmount(() => {
@@ -138,7 +156,19 @@ onBeforeUnmount(() => {
                 v-if="status === 'converting'"
                 class="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100"
             >
-                {{ t('convertingNotice') }}
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span>{{ t('convertingNotice') }}</span>
+                    <span v-if="progressPercent !== null" class="text-xs text-amber-200">{{ progressPercent }}%</span>
+                </div>
+                <div
+                    v-if="progressPercent !== null"
+                    class="mt-3 h-2 w-full overflow-hidden rounded-full bg-amber-500/20"
+                >
+                    <div
+                        class="h-full rounded-full bg-amber-400 transition-[width] duration-200"
+                        :style="{ width: `${progressPercent}%` }"
+                    ></div>
+                </div>
             </div>
 
             <div

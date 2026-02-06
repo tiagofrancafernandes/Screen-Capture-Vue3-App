@@ -11,6 +11,7 @@ const {
     errorKey,
     elapsedMs,
     conversionSource,
+    conversionProgress,
     isRecording,
     isPaused,
     isConverting,
@@ -115,6 +116,13 @@ const ffmpegModeLabel = computed(() => {
     return conversionSource.value.coreMode === 'multi' ? t('ffmpegModeMulti') : t('ffmpegModeSingle');
 });
 
+const progressPercent = computed(() => {
+    if (conversionProgress.value === null) {
+        return null;
+    }
+    return Math.round(conversionProgress.value * 100);
+});
+
 const recTitleIcon = ref('');
 let titleBlinkId: number | null = null;
 
@@ -196,7 +204,16 @@ onBeforeUnmount(() => {
             v-if="isConverting"
             class="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100"
         >
-            {{ t('convertingNotice') }}
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <span>{{ t('convertingNotice') }}</span>
+                <span v-if="progressPercent !== null" class="text-xs text-amber-200">{{ progressPercent }}%</span>
+            </div>
+            <div v-if="progressPercent !== null" class="mt-3 h-2 w-full overflow-hidden rounded-full bg-amber-500/20">
+                <div
+                    class="h-full rounded-full bg-amber-400 transition-[width] duration-200"
+                    :style="{ width: `${progressPercent}%` }"
+                ></div>
+            </div>
         </div>
 
         <div

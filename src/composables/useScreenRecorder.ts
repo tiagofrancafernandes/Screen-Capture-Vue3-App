@@ -45,6 +45,7 @@ export const useScreenRecorder = () => {
     const mp4Url = ref<string | null>(null);
     const filenameBase = ref<string>('recording');
     const conversionSource = ref<{ engine: 'ffmpeg-wasm'; coreMode: FfmpegCoreMode } | null>(null);
+    const conversionProgress = ref<number | null>(null);
 
     let chunks: BlobPart[] = [];
     let timerId: number | null = null;
@@ -91,6 +92,7 @@ export const useScreenRecorder = () => {
         webmBlob.value = null;
         mp4Blob.value = null;
         conversionSource.value = null;
+        conversionProgress.value = null;
         setObjectUrl(webmUrl, null);
         setObjectUrl(mp4Url, null);
     };
@@ -193,9 +195,14 @@ export const useScreenRecorder = () => {
 
         status.value = 'converting';
         errorKey.value = null;
+        conversionProgress.value = 0;
 
         try {
-            const result = await convertWebmToMp4(webmBlob.value);
+            const result = await convertWebmToMp4(webmBlob.value, {
+                onProgress: (ratio) => {
+                    conversionProgress.value = Math.min(Math.max(ratio, 0), 1);
+                },
+            });
             mp4Blob.value = result.blob;
             conversionSource.value = { engine: result.source, coreMode: result.coreMode };
             setObjectUrl(mp4Url, result.blob);
@@ -203,6 +210,10 @@ export const useScreenRecorder = () => {
         } catch (error) {
             errorKey.value = 'conversion_failed';
             status.value = 'ready';
+        } finally {
+            if (status.value !== 'converting') {
+                conversionProgress.value = null;
+            }
         }
     };
 
@@ -319,6 +330,7 @@ export const useScreenRecorder = () => {
         errorKey,
         elapsedMs,
         conversionSource,
+        conversionProgress,
         isRecording,
         isPaused,
         isConverting,

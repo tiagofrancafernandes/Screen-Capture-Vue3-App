@@ -1,4 +1,5 @@
 export type FfmpegCoreMode = 'single' | 'multi';
+export type ProgressCallback = (ratio: number) => void;
 
 type ConversionResult = {
     blob: Blob;
@@ -88,8 +89,36 @@ const getFfmpegInstance = async () => {
     return ffmpegInstancePromise;
 };
 
-const convertViaFfmpegWasm = async (webmBlob: Blob): Promise<{ blob: Blob; coreMode: FfmpegCoreMode }> => {
+let progressListenerRegistered = false;
+let progressCallback: ProgressCallback | null = null;
+
+const ensureProgressListener = (ffmpeg: {
+    on: (event: string, callback: (payload: { ratio: number }) => void) => void;
+}) => {
+    if (progressListenerRegistered) {
+        return;
+    }
+
+    ffmpeg.on('progress', ({ ratio }) => {
+        if (progressCallback) {
+            const safeRatio = Number.isFinite(ratio) ? ratio : 0;
+            const clamped = Math.min(Math.max(safeRatio, 0), 1);
+            progressCallback(clamped);
+        }
+    });
+    progressListenerRegistered = true;
+};
+
+const convertViaFfmpegWasm = async (
+    webmBlob: Blob,
+    onProgress?: ProgressCallback
+): Promise<{ blob: Blob; coreMode: FfmpegCoreMode }> => {
     const { ffmpeg, fetchFile, coreMode } = await getFfmpegInstance();
+    progressCallback = onProgress ?? null;
+    ensureProgressListener(ffmpeg);
+    if (onProgress) {
+        onProgress(0);
+    }
     const inputName = `input-${Date.now()}.webm`;
     const outputName = `output-${Date.now()}.mp4`;
 
@@ -100,10 +129,19 @@ const convertViaFfmpegWasm = async (webmBlob: Blob): Promise<{ blob: Blob; coreM
     buffer.set(data);
     await ffmpeg.deleteFile(inputName);
     await ffmpeg.deleteFile(outputName);
+    if (onProgress) {
+        onProgress(1);
+    }
+    if (progressCallback === onProgress) {
+        progressCallback = null;
+    }
     return { blob: new Blob([buffer.buffer], { type: 'video/mp4' }), coreMode };
 };
 
-export const convertWebmToMp4 = async (webmBlob: Blob): Promise<ConversionResult> => {
-    const { blob, coreMode } = await convertViaFfmpegWasm(webmBlob);
+export const convertWebmToMp4 = async (
+    webmBlob: Blob,
+    options?: { onProgress?: ProgressCallback }
+): Promise<ConversionResult> => {
+    const { blob, coreMode } = await convertViaFfmpegWasm(webmBlob, options?.onProgress);
     return { blob, source: 'ffmpeg-wasm', coreMode };
 };
