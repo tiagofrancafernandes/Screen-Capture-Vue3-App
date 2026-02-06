@@ -1,18 +1,56 @@
+export type FfmpegCoreMode = 'single' | 'multi';
+
 type ConversionResult = {
     blob: Blob;
     source: 'ffmpeg-wasm';
+    coreMode: FfmpegCoreMode;
 };
 
-const CORE_BASE_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core-mt@0.12.10/dist/esm';
+const CORE_BASE_PATHS = {
+    single: 'ffmpeg/core',
+    multi: 'ffmpeg/core-mt',
+};
+
+const getAssetBaseUrl = () => {
+    const base = import.meta.env.BASE_URL ?? '/';
+    return base.endsWith('/') ? base : `${base}/`;
+};
+
+const toAbsoluteUrl = (path: string) => {
+    if (typeof window === 'undefined') {
+        return path;
+    }
+    return new URL(path, window.location.origin).toString();
+};
+
+const buildCoreUrls = async (coreBase: string, withWorker: boolean, coreMode: FfmpegCoreMode) => {
+    const { toBlobURL } = await import('@ffmpeg/util');
+    const coreURL = await toBlobURL(toAbsoluteUrl(`${coreBase}/ffmpeg-core.js`), 'text/javascript');
+    const wasmURL = await toBlobURL(toAbsoluteUrl(`${coreBase}/ffmpeg-core.wasm`), 'application/wasm');
+    const workerURL = withWorker
+        ? await toBlobURL(toAbsoluteUrl(`${coreBase}/ffmpeg-core.worker.js`), 'text/javascript')
+        : undefined;
+
+    return { coreURL, wasmURL, workerURL, coreMode };
+};
 
 const loadCoreUrls = async () => {
-    const { toBlobURL } = await import('@ffmpeg/util');
+    const assetBase = getAssetBaseUrl();
+    const preferMulti = typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated;
+    const multiBase = `${assetBase}${CORE_BASE_PATHS.multi}`;
+    const singleBase = `${assetBase}${CORE_BASE_PATHS.single}`;
+    const first = preferMulti
+        ? { base: multiBase, withWorker: true, mode: 'multi' as const }
+        : { base: singleBase, withWorker: false, mode: 'single' as const };
+    const second = preferMulti
+        ? { base: singleBase, withWorker: false, mode: 'single' as const }
+        : { base: multiBase, withWorker: true, mode: 'multi' as const };
 
-    const coreURL = await toBlobURL(`${CORE_BASE_URL}/ffmpeg-core.js`, 'text/javascript');
-    const wasmURL = await toBlobURL(`${CORE_BASE_URL}/ffmpeg-core.wasm`, 'application/wasm');
-    const workerURL = await toBlobURL(`${CORE_BASE_URL}/ffmpeg-core.worker.js`, 'text/javascript');
-
-    return { coreURL, wasmURL, workerURL };
+    try {
+        return await buildCoreUrls(first.base, first.withWorker, first.mode);
+    } catch (error) {
+        return await buildCoreUrls(second.base, second.withWorker, second.mode);
+    }
 };
 
 let coreUrlsPromise: ReturnType<typeof loadCoreUrls> | null = null;
@@ -30,12 +68,13 @@ const loadFfmpeg = async () => {
     const utilModule = await import('@ffmpeg/util');
 
     const ffmpeg = new ffmpegModule.FFmpeg();
-    const { coreURL, wasmURL, workerURL } = await getCoreUrls();
+    const { coreURL, wasmURL, workerURL, coreMode } = await getCoreUrls();
     await ffmpeg.load({ coreURL, wasmURL, workerURL });
 
     return {
         ffmpeg,
         fetchFile: utilModule.fetchFile,
+        coreMode,
     };
 };
 
@@ -49,8 +88,8 @@ const getFfmpegInstance = async () => {
     return ffmpegInstancePromise;
 };
 
-const convertViaFfmpegWasm = async (webmBlob: Blob): Promise<Blob> => {
-    const { ffmpeg, fetchFile } = await getFfmpegInstance();
+const convertViaFfmpegWasm = async (webmBlob: Blob): Promise<{ blob: Blob; coreMode: FfmpegCoreMode }> => {
+    const { ffmpeg, fetchFile, coreMode } = await getFfmpegInstance();
     const inputName = `input-${Date.now()}.webm`;
     const outputName = `output-${Date.now()}.mp4`;
 
@@ -61,10 +100,10 @@ const convertViaFfmpegWasm = async (webmBlob: Blob): Promise<Blob> => {
     buffer.set(data);
     await ffmpeg.deleteFile(inputName);
     await ffmpeg.deleteFile(outputName);
-    return new Blob([buffer.buffer], { type: 'video/mp4' });
+    return { blob: new Blob([buffer.buffer], { type: 'video/mp4' }), coreMode };
 };
 
 export const convertWebmToMp4 = async (webmBlob: Blob): Promise<ConversionResult> => {
-    const wasmBlob = await convertViaFfmpegWasm(webmBlob);
-    return { blob: wasmBlob, source: 'ffmpeg-wasm' };
+    const { blob, coreMode } = await convertViaFfmpegWasm(webmBlob);
+    return { blob, source: 'ffmpeg-wasm', coreMode };
 };

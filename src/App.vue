@@ -168,6 +168,14 @@ const canConvert = computed(
 const webmDownloadName = computed(() =>
     hasMp4.value ? downloadName.value.replace(/\\.mp4$/, '.webm') : downloadName.value
 );
+
+const ffmpegModeLabel = computed(() => {
+    if (!conversionSource.value) {
+        return null;
+    }
+
+    return conversionSource.value.coreMode === 'multi' ? t('ffmpegModeMulti') : t('ffmpegModeSingle');
+});
 </script>
 
 <template>
@@ -301,8 +309,8 @@ const webmDownloadName = computed(() =>
                         {{ t('downloadWebm') }}
                     </a>
                     <span v-if="isReady" class="text-sm text-slate-300">{{ t('downloadReady') }}</span>
-                    <span v-if="conversionSource" class="text-xs uppercase tracking-wide text-slate-500">
-                        FFmpeg.wasm
+                    <span v-if="ffmpegModeLabel" class="text-xs uppercase tracking-wide text-slate-500">
+                        {{ ffmpegModeLabel }}
                     </span>
                 </div>
             </section>

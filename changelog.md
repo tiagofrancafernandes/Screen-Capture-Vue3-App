@@ -5,5 +5,8 @@
 - Added English/Portuguese i18n, language switcher, and persisted locale preference.
 - Added recording preview player plus separate buttons for convert and download.
 - Added Vite optimizeDeps exclusions to prevent FFmpeg worker preload issues.
+- Switched FFmpeg core assets to local `public/ffmpeg` hosting with a postinstall copy script.
+- Added single-thread FFmpeg core fallback for non-isolated pages.
+- Added UI label to show FFmpeg single/multi-thread mode after conversion.
 - Updated README with usage, limitations, and linked Portuguese version.
 - Added `README.pt-BR.md`.

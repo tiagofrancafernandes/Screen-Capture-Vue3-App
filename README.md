@@ -16,10 +16,19 @@ A Vue 3 web app that records your screen with microphone and system audio (when 
 npm install
 ```
 
+This will copy FFmpeg core assets into `public/ffmpeg` for local loading (single-thread and multi-thread).
+
 ## Run locally
 
 ```bash
 npm run dev
+```
+
+## Run in production mode
+
+```bash
+npm run build
+npm run preview
 ```
 
 ## Supported browsers
@@ -48,7 +57,8 @@ Safari is not supported for this workflow because of incomplete MediaRecorder an
 - FFmpeg.wasm uses significant CPU and memory; weaker machines may struggle.
 - The tab must stay open during conversion.
 - System audio capture depends on browser and user-selected source.
-- FFmpeg.wasm core assets are fetched from a CDN at runtime. Offline use requires hosting those files yourself.
+- FFmpeg.wasm core assets are served locally from `public/ffmpeg`. If you remove them, conversion will fail.
+- Multi-threaded FFmpeg requires cross-origin isolation (COOP/COEP). Without it, the app uses single-threaded core.
 
 ## Troubleshooting
 

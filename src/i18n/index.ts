@@ -33,6 +33,8 @@ export const messages = {
         autoConvertLabel: 'Convert automatically',
         convertMp4: 'Convert to MP4',
         previewLabel: 'Preview',
+        ffmpegModeSingle: 'FFmpeg.wasm (single-thread)',
+        ffmpegModeMulti: 'FFmpeg.wasm (multi-thread)',
     },
     pt: {
         appTitle: 'Gravador de Tela',
@@ -65,6 +67,8 @@ export const messages = {
         autoConvertLabel: 'Converter automaticamente',
         convertMp4: 'Converter para MP4',
         previewLabel: 'Previa',
+        ffmpegModeSingle: 'FFmpeg.wasm (thread unico)',
+        ffmpegModeMulti: 'FFmpeg.wasm (multi-thread)',
     },
 } as const;
 

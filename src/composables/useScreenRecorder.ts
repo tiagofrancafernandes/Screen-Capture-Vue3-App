@@ -1,5 +1,5 @@
 import { computed, onBeforeUnmount, ref } from 'vue';
-import { convertWebmToMp4 } from '../services/convert';
+import { convertWebmToMp4, type FfmpegCoreMode } from '../services/convert';
 
 export type RecordingStatus = 'idle' | 'recording' | 'paused' | 'converting' | 'ready' | 'error';
 export type RecorderError = 'unsupported' | 'start_failed' | 'conversion_failed';
@@ -44,7 +44,7 @@ export const useScreenRecorder = () => {
     const webmUrl = ref<string | null>(null);
     const mp4Url = ref<string | null>(null);
     const filenameBase = ref<string>('recording');
-    const conversionSource = ref<'ffmpeg-wasm' | null>(null);
+    const conversionSource = ref<{ engine: 'ffmpeg-wasm'; coreMode: FfmpegCoreMode } | null>(null);
 
     let chunks: BlobPart[] = [];
     let timerId: number | null = null;
@@ -197,7 +197,7 @@ export const useScreenRecorder = () => {
         try {
             const result = await convertWebmToMp4(webmBlob.value);
             mp4Blob.value = result.blob;
-            conversionSource.value = result.source;
+            conversionSource.value = { engine: result.source, coreMode: result.coreMode };
             setObjectUrl(mp4Url, result.blob);
             status.value = 'ready';
         } catch (error) {

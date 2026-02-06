@@ -16,10 +16,19 @@ Aplicativo web em Vue 3 que grava a tela com audio do microfone e audio do siste
 npm install
 ```
 
+Esse comando copia os assets do FFmpeg para `public/ffmpeg` para uso local (single-thread e multi-thread).
+
 ## Rodar localmente
 
 ```bash
 npm run dev
+```
+
+## Rodar em modo de producao
+
+```bash
+npm run build
+npm run preview
 ```
 
 ## Navegadores suportados
@@ -48,7 +57,8 @@ Safari nao e suportado para este fluxo por causa do suporte incompleto a MediaRe
 - FFmpeg.wasm usa muita CPU e memoria; maquinas fracas podem sofrer.
 - A aba deve permanecer aberta durante a conversao.
 - A captura de audio do sistema depende do navegador e da fonte selecionada.
-- Os assets do core do FFmpeg.wasm sao baixados de um CDN em tempo de execucao. Para uso offline, hospede esses arquivos por conta propria.
+- Os assets do core do FFmpeg.wasm sao servidos localmente em `public/ffmpeg`. Se remover esses arquivos, a conversao falha.
+- O FFmpeg multi-thread exige cross-origin isolation (COOP/COEP). Sem isso, o app usa o core single-thread.
 
 ## Solucao de problemas
 
