@@ -39,8 +39,8 @@ Safari is not supported for this workflow because of incomplete MediaRecorder an
 ## MP4 conversion controls
 
 - By default, conversion is manual.
-- Use the checkbox “Convert automatically” to convert after each recording.
-- Use “Convert to MP4” to start conversion manually, then “Download MP4”.
+- Use the checkbox "Convert automatically" to convert after each recording.
+- Use "Convert to MP4" to start conversion manually, then "Download MP4".
 
 ## Known limitations
 

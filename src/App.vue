@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue';
 import { useI18n, type Locale, type MessageKey } from './i18n';
 import { useScreenRecorder } from './composables/useScreenRecorder';
 
@@ -33,6 +33,61 @@ const localeModel = computed<Locale>({
 
 watch(locale, (value) => {
     document.documentElement.lang = value;
+});
+
+const updateMetaTag = (selector: string, content: string) => {
+    const element = document.querySelector<HTMLMetaElement>(selector);
+    if (element) {
+        element.setAttribute('content', content);
+    }
+};
+
+const recTitleIcon = ref('');
+let titleBlinkId: number | null = null;
+
+const stopTitleBlink = () => {
+    if (titleBlinkId !== null) {
+        window.clearInterval(titleBlinkId);
+        titleBlinkId = null;
+    }
+};
+
+watch(
+    [isRecording, isPaused],
+    ([recording, paused]) => {
+        stopTitleBlink();
+
+        if (recording) {
+            let on = true;
+            recTitleIcon.value = '● ';
+            titleBlinkId = window.setInterval(() => {
+                recTitleIcon.value = on ? '🔴 ' : '⚪ ';
+                on = !on;
+            }, 650);
+            return;
+        }
+
+        if (paused) {
+            recTitleIcon.value = '⏸ ';
+            return;
+        }
+
+        recTitleIcon.value = ' ';
+    },
+    { immediate: true }
+);
+
+onBeforeUnmount(() => {
+    stopTitleBlink();
+});
+
+watchEffect(() => {
+    document.title = `${recTitleIcon.value}${t('appTitle')}`;
+    updateMetaTag('meta[name=\"description\"]', t('appDescription'));
+    updateMetaTag('meta[property=\"og:title\"]', t('appTitle'));
+    updateMetaTag('meta[property=\"og:description\"]', t('appDescription'));
+    updateMetaTag('meta[name=\"twitter:title\"]', t('appTitle'));
+    updateMetaTag('meta[name=\"twitter:description\"]', t('appDescription'));
 });
 
 const AUTO_CONVERT_KEY = 'autoConvertMp4';
@@ -143,7 +198,16 @@ const webmDownloadName = computed(() =>
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <p class="text-xs uppercase tracking-wide text-slate-400">{{ t('statusLabel') }}</p>
-                        <p class="text-xl font-semibold">{{ statusLabel }}</p>
+                        <div class="mt-2 flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="h-2.5 w-2.5 rounded-full"
+                                    :class="isRecording ? 'bg-rose-500 animate-pulse' : 'bg-slate-500'"
+                                ></span>
+                                <span class="text-xs uppercase tracking-widest text-slate-400">Rec</span>
+                            </div>
+                            <p class="text-xl font-semibold">{{ statusLabel }}</p>
+                        </div>
                     </div>
                     <div class="text-right">
                         <p class="text-xs uppercase tracking-wide text-slate-400">{{ t('timerLabel') }}</p>

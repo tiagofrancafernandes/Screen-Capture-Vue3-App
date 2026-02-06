@@ -4,6 +4,8 @@ export const messages = {
     en: {
         appTitle: 'Screen Recorder',
         appSubtitle: 'Record your screen with system and microphone audio.',
+        appDescription:
+            'Record your screen with system and microphone audio, then export an MP4 file with FFmpeg.wasm.',
         start: 'Start Recording',
         pause: 'Pause',
         resume: 'Resume',
@@ -35,6 +37,7 @@ export const messages = {
     pt: {
         appTitle: 'Gravador de Tela',
         appSubtitle: 'Grave sua tela com áudio do sistema e do microfone.',
+        appDescription: 'Grave a tela com áudio do sistema e do microfone e exporte um arquivo MP4 com FFmpeg.wasm.',
         start: 'Iniciar Gravação',
         pause: 'Pausar',
         resume: 'Retomar',
