@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import './assets/main.css';
 import App from './App.vue';
+import router from './router';
 
 // import { toast } from 'vue3-toastify';
 /* toast(...) */
@@ -21,5 +22,6 @@ const toastOptions: ToastContainerOptions = {
 };
 
 app.use(Vue3Toastify, toastOptions);
+app.use(router);
 
 app.mount('#app');

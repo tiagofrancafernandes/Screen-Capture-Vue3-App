@@ -45,6 +45,11 @@ Safari nao e suportado para este fluxo por causa do suporte incompleto a MediaRe
 3. As faixas de audio sao mixadas com Web Audio API e gravadas com `MediaRecorder` em WebM.
 4. Apos finalizar, o FFmpeg.wasm converte WebM para MP4 (H.264 + AAC).
 
+## Conversor WebM para MP4
+
+- Use a aba Conversor para converter um arquivo WebM existente para MP4.
+- Um arquivo demo esta disponivel em `public/demo-files/demo-webm.webm` e pode ser baixado pela UI.
+
 ## Controles de conversao para MP4
 
 - Por padrao, a conversao e manual.

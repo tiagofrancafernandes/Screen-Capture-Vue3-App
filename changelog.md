@@ -1,6 +1,6 @@
 ### [2026-02-06]
 - Added in-browser screen recording with pause/resume/stop and WebM capture.
-- Added FFmpeg.wasm-based MP4 conversion with explicit core asset loading via CDN.
+- Added FFmpeg.wasm-based MP4 conversion with local core asset loading.
 - Implemented manual conversion flow with optional auto-convert preference stored in localStorage.
 - Added English/Portuguese i18n, language switcher, and persisted locale preference.
 - Added recording preview player plus separate buttons for convert and download.
@@ -8,5 +8,6 @@
 - Switched FFmpeg core assets to local `public/ffmpeg` hosting with a postinstall copy script.
 - Added single-thread FFmpeg core fallback for non-isolated pages.
 - Added UI label to show FFmpeg single/multi-thread mode after conversion.
+- Added a converter view for WebM to MP4 with a demo download link.
 - Updated README with usage, limitations, and linked Portuguese version.
 - Added `README.pt-BR.md`.
