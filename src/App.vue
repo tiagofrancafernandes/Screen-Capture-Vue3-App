@@ -21,7 +21,6 @@ const {
     stopRecording,
     resetRecording,
     convertToMp4,
-    downloadUrl,
     downloadName,
     webmUrl,
     mp4Url,
@@ -111,7 +110,6 @@ const canConvert = computed(
     () => hasWebm.value && !hasMp4.value && !isConverting.value && !isRecording.value && !isPaused.value
 );
 
-const downloadLabel = computed(() => (downloadName.value.endsWith('.mp4') ? t('downloadMp4') : t('downloadWebm')));
 const webmDownloadName = computed(() =>
     hasMp4.value ? downloadName.value.replace(/\\.mp4$/, '.webm') : downloadName.value
 );
