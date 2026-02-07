@@ -1,3 +1,5 @@
+import type { FFmpeg } from '@ffmpeg/ffmpeg';
+
 export type FfmpegCoreMode = 'single' | 'multi';
 export type ProgressCallback = (ratio: number) => void;
 
@@ -92,15 +94,14 @@ const getFfmpegInstance = async () => {
 let progressListenerRegistered = false;
 let progressCallback: ProgressCallback | null = null;
 
-const ensureProgressListener = (ffmpeg: {
-    on: (event: string, callback: (payload: { ratio: number }) => void) => void;
-}) => {
+const ensureProgressListener = (ffmpeg: FFmpeg) => {
     if (progressListenerRegistered) {
         return;
     }
 
-    ffmpeg.on('progress', ({ ratio }) => {
+    ffmpeg.on('progress', (payload) => {
         if (progressCallback) {
+            const ratio = Number((payload as { ratio?: number }).ratio ?? 0);
             const safeRatio = Number.isFinite(ratio) ? ratio : 0;
             const clamped = Math.min(Math.max(safeRatio, 0), 1);
             progressCallback(clamped);

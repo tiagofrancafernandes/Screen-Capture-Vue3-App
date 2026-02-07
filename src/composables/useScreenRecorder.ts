@@ -13,7 +13,7 @@ type RecorderState = {
 
 const createFilenameBase = () => {
     const now = new Date();
-    const pad = (value: number) => String(value).padStart(2, '0');
+    const pad = (value: number | string | null) => String(value || '').padStart(2, '0');
     return `recording-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(
         now.getHours()
     )}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
