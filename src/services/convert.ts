@@ -124,7 +124,33 @@ const convertViaFfmpegWasm = async (
     const outputName = `output-${Date.now()}.mp4`;
 
     await ffmpeg.writeFile(inputName, await fetchFile(webmBlob));
-    await ffmpeg.exec(['-i', inputName, '-c:v', 'libx264', '-c:a', 'aac', '-movflags', 'faststart', outputName]);
+
+    const runPresets = {
+        lossless1: ['-c:v', 'libx264', '-preset', 'veryfast', '-c:a', 'aac', '-crf', '18'],
+        lossless2: ['-c:v', 'libx264', '-preset', 'veryfast', '-c:a', 'aac', '-crf', '20'],
+        small1: ['-c:v', 'libx264', '-preset', 'veryfast', '-c:a', 'aac', '-crf', '22'],
+        small2: ['-c:v', 'libx264', '-preset', 'veryfast', '-c:a', 'aac', '-crf', '24'],
+        small3: ['-c:v', 'libx264', '-preset', 'veryfast', '-c:a', 'aac', '-crf', '30'],
+        copy: ['-c', 'copy'],
+    }
+
+    // await ffmpeg.exec(['-i', inputName, '-c:v', 'libx264', '-c:a', 'aac', '-movflags', 'faststart', outputName]);
+    // ffmpeg -i [inputFile] -c:v libx264 -preset veryfast -c:a aac -crf 22 [outputFile]
+
+    const preset = 'small1'; // On future will receive this value via user form/request
+    const runArgs = preset && preset in runPresets ? runPresets[preset] : runPresets.small1;
+
+    const finalExecParams = [ '-i', inputName, ...runArgs, outputName ];
+
+    console.log({
+        preset,
+        runArgs,
+        finalExecParams,
+    });
+
+    // await ffmpeg.exec(finalExecParams);
+
+    await ffmpeg.exec([ '-i', inputName, '-c:v', 'libx264', '-preset', 'veryfast', '-c:a', 'aac', '-crf', '22', outputName ]);
     const data = (await ffmpeg.readFile(outputName)) as Uint8Array;
     const buffer = new Uint8Array(data.byteLength);
     buffer.set(data);
